@@ -1,0 +1,62 @@
+name: Staging Deployment
+on:
+    push:
+        branches:
+            - staging
+jobs:
+    build:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 21
+                  cache: "npm"
+
+            - name: Install NPM dependencies
+              run: npm install
+
+            - name: Compiling assets
+              run: npm run build
+
+            - name: Archive build artifacts
+              uses: actions/upload-artifact@v4
+              with:
+                  name: js-dist
+                  path: public/build
+
+    deploy:
+        runs-on: ubuntu-24.04
+        needs: [build]
+        steps:
+            - name: Check out repository code
+              uses: actions/checkout@v4
+
+            - name: Download js build
+              uses: actions/download-artifact@v4
+              with:
+                  name: js-dist
+
+            - name: Install laravel envoy
+              uses: php-actions/composer@v6
+              with:
+                  args: --ignore-platform-reqs
+                  command: require laravel/envoy --dev
+
+            - name: Adding staging server key
+              run: |
+                  echo "${{ secrets.DEV_PRIVATE_KEY }}" > ~/.ssh/id_rsa && chmod 600 ~/.ssh/id_rsa
+                  ssh-keyscan -H "app.checkypro.com" > ~/.ssh/known_hosts
+
+            - name: Deploying to staging server
+              run: ./vendor/bin/envoy run deploy
+
+            - name: Creating js build folder
+              run: mkdir build && cp -R assets/ manifest.json build
+
+            - name: Copying JS build to server
+              run: scp -r build/ dev@checkypro.robustapps.net:/var/www/checkypro/current/public/
