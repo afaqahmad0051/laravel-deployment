@@ -1,8 +1,8 @@
-name: Staging Deployment
+name: Laravel Auto Deployment
 on:
     push:
         branches:
-            - staging
+            - branch-name
 jobs:
     build:
         runs-on: ubuntu-latest
