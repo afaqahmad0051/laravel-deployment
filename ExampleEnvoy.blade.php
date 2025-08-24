@@ -2,9 +2,9 @@
 
 @setup
     $env = isset($env) ? $env : 'staging';
-    $repository = ($env == 'production') ? 'git@github.com:RobustAgency/checkypro.git' : 'git@github.com-repo-3:RobustAgency/checkypro.git';
+    $repository = ($env == 'production') ? 'git@github.com:account/repo.git' : 'git@github.com-repo-3:account/repo.git';
     $branch = $env == 'production' ? 'main' : 'staging';
-    $app_dir = $env == 'production' ? '/var/www/app' : '/var/www/checkypro';
+    $app_dir = $env == 'production' ? '/var/www/app' : '/var/www/app-name';
     $release = date('Y_m_d_H_i');
     $releases_dir = $app_dir . '/releases';
     $new_release_dir = $releases_dir .'/'. $release;
